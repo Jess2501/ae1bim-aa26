@@ -1,0 +1,1 @@
+cadena_conexion = "sqlite:///universidad.db"

@@ -1,19 +1,34 @@
+
 from sqlalchemy import or_
 from sqlalchemy.orm import sessionmaker
-from crear_base_entidades import Engine, RecursoAcademico
+
+from crear_base_entidades import (
+    Engine,
+    Veterinario,
+    Consultorio
+)
 
 Session = sessionmaker(bind=Engine)
 session = Session()
 
-print("\n--- 5. Uso de OR_() (Buscar recursos que sean tipo 'Video' O de la carrera de Medicina) ---")
-recursos = session.query(RecursoAcademico).filter(
-    or_(
-        RecursoAcademico.tipo == 'Video',
-        RecursoAcademico.carrera_id == 2
+# Buscar veterinarios de Medicina General o Cirugía
+resultados = (
+    session.query(Veterinario)
+    .join(Veterinario.consultorio)
+    .filter(
+        or_(
+            Consultorio.especialidad == "Medicina General",
+            Consultorio.especialidad == "Cirugia"
+        )
     )
-).all()
+    .all()
+)
 
-for r in recursos:
-    print(f"Recurso (OR): {r.titulo} | Tipo: {r.tipo}")
+print("\nVETERINARIOS DE MEDICINA GENERAL O CIRUGIA")
+
+for veterinario in resultados:
+    print("Nombre:", veterinario.nombres, veterinario.apellidos)
+    print("Especialidad:", veterinario.consultorio.especialidad)
+    print("-----------------------------")
 
 session.close()

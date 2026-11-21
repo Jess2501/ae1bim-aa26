@@ -1,1 +1,1 @@
-cadena_conexion = "sqlite:///universidad.db"
+cadena_conexion = "sqlite:///clinicas_veterinarias.db"

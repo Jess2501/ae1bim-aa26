@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import declarative_base, relationship
 from configuracion import cadena_conexion
 
@@ -6,50 +7,88 @@ from configuracion import cadena_conexion
 Engine = create_engine(cadena_conexion)
 Base = declarative_base()
 
-class Facultad(Base):
-    __tablename__ = 'facultades'
-    
+
+class Clinica(Base):
+    __tablename__ = 'clinicas'
+
     id = Column(Integer, primary_key=True)
     nombre = Column(String(100), nullable=False)
-    ubicacion = Column(String(150), nullable=False)
-    decano = Column(String(100), nullable=False)
-    
-    carreras = relationship("Carrera", back_populates="facultad", cascade="all, delete-orphan")
+    direccion = Column(String(150), nullable=False)
+    responsable = Column(String(100), nullable=False)
 
-class Carrera(Base):
-    __tablename__ = 'carreras'
-    
-    id = Column(Integer, primary_key=True)
-    nombre = Column(String(100), nullable=False)
-    codigo = Column(String(20), nullable=False, unique=True)
-    facultad_id = Column(Integer, ForeignKey('facultades.id'), nullable=False)
-    
-    facultad = relationship("Facultad", back_populates="carreras")
-    profesores = relationship("Profesor", back_populates="carrera", cascade="all, delete-orphan")
-    recursos = relationship("RecursoAcademico", back_populates="carrera", cascade="all, delete-orphan")
+    consultorios = relationship(
+        "Consultorio",
+        back_populates="clinica",
+        cascade="all, delete-orphan"
+    )
 
-class Profesor(Base):
-    __tablename__ = 'profesores'
-    
+
+class Consultorio(Base):
+    __tablename__ = 'consultorios'
+
     id = Column(Integer, primary_key=True)
     nombre = Column(String(100), nullable=False)
     especialidad = Column(String(100), nullable=False)
-    correo = Column(String(100), nullable=False)
-    carrera_id = Column(Integer, ForeignKey('carreras.id'), nullable=False)
-    
-    carrera = relationship("Carrera", back_populates="profesores")
+    clinica_id = Column(Integer, ForeignKey('clinicas.id'), nullable=False)
 
-class RecursoAcademico(Base):
-    __tablename__ = 'recursos_academicos'
-    
+    clinica = relationship("Clinica", back_populates="consultorios")
+
+    veterinarios = relationship(
+        "Veterinario",
+        back_populates="consultorio",
+        cascade="all, delete-orphan"
+    )
+
+
+class Veterinario(Base):
+    __tablename__ = 'veterinarios'
+
     id = Column(Integer, primary_key=True)
-    titulo = Column(String(150), nullable=False)
-    tipo = Column(String(50), nullable=False)
-    url = Column(String(200), nullable=False)
-    carrera_id = Column(Integer, ForeignKey('carreras.id'), nullable=False)
-    
-    carrera = relationship("Carrera", back_populates="recursos")
+    nombres = Column(String(100), nullable=False)
+    apellidos = Column(String(100), nullable=False)
+    correo = Column(String(120), nullable=False, unique=True)
+    licencia = Column(String(50), nullable=False, unique=True)
+
+    consultorio_id = Column(
+        Integer,
+        ForeignKey('consultorios.id'),
+        nullable=False
+    )
+
+    consultorio = relationship(
+        "Consultorio",
+        back_populates="veterinarios"
+    )
+
+    historias = relationship(
+        "HistoriaClinica",
+        back_populates="veterinario",
+        cascade="all, delete-orphan"
+    )
+
+
+class HistoriaClinica(Base):
+    __tablename__ = 'historias_clinicas'
+
+    id = Column(Integer, primary_key=True)
+    fecha = Column(Date, nullable=False)
+    diagnostico = Column(String(200), nullable=False)
+    tratamiento = Column(String(200), nullable=False)
+    mascota = Column(String(100), nullable=False)
+
+    veterinario_id = Column(
+        Integer,
+        ForeignKey('veterinarios.id'),
+        nullable=False
+    )
+
+    veterinario = relationship(
+        "Veterinario",
+        back_populates="historias"
+    )
+
 
 # Generar físicamente las tablas
 Base.metadata.create_all(Engine)
+
 print("Base de datos y tablas creadas con éxito.")

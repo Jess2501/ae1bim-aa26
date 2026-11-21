@@ -1,12 +1,29 @@
+
 from sqlalchemy.orm import sessionmaker
-from crear_base_entidades import Engine, RecursoAcademico
+
+from crear_base_entidades import (
+    Engine,
+    Veterinario,
+    Consultorio
+)
 
 Session = sessionmaker(bind=Engine)
 session = Session()
 
-print("\n--- 2. Uso de FILTER() (Buscar recursos de tipo 'Guía de estudio') ---")
-recursos = session.query(RecursoAcademico).filter(RecursoAcademico.tipo == 'Guía de estudio').all()
-for r in recursos:
-    print(f"Recurso: {r.titulo} | URL: {r.url}")
+# Buscar veterinarios de Medicina General
+resultados = (
+    session.query(Veterinario)
+    .join(Veterinario.consultorio)
+    .filter(Consultorio.especialidad == "Medicina General")
+    .all()
+)
+
+print("\nVETERINARIOS DE MEDICINA GENERAL")
+
+for veterinario in resultados:
+    print("Nombres:", veterinario.nombres)
+    print("Apellidos:", veterinario.apellidos)
+    print("Correo:", veterinario.correo)
+    print("-----------------------------")
 
 session.close()

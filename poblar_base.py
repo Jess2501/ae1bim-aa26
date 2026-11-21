@@ -1,33 +1,124 @@
-from sqlalchemy.orm import sessionmaker
-from crear_base_entidades import Engine, Facultad, Carrera, Profesor, RecursoAcademico
 
+from datetime import date
+from sqlalchemy.orm import sessionmaker
+from crear_base_entidades import (
+    Engine,
+    Clinica,
+    Consultorio,
+    Veterinario,
+    HistoriaClinica
+)
+
+# Crear sesión
 Session = sessionmaker(bind=Engine)
 session = Session()
 
 try:
-    # 1. Crear Facultad
-    fac1 = Facultad(nombre='Facultad de Ingeniería y Ciencias', ubicacion='Campus Central - Bloque A', decano='Dr. Carlos Mendoza')
-    fac2 = Facultad(nombre='Facultad de Ciencias de la Salud', ubicacion='Campus Norte - Edificio Médico', decano='Dra. María Espinoza')
-    
-    # 2. Crear Carreras
-    car1 = Carrera(nombre='Software', codigo='SOFT-001', facultad=fac1)
-    car2 = Carrera(nombre='Medicina', codigo='MED-002', facultad=fac2)
-    
-    # 3. Crear Profesores
-    prof1 = Profesor(nombre='Alex Valdiviezo', especialidad='Desarrollo Web', correo='avaldiviezo@universidad.edu.ec', carrera=car1)
-    prof2 = Profesor(nombre='Dr. Luis Segura', especialidad='Anatomía', correo='lsegura@universidad.edu.ec', carrera=car2)
-    
-    # 4. Crear Recursos Académicos
-    rec1 = RecursoAcademico(titulo='Guía de Estudio: Introducción a SQLAlchemy', tipo='Guía de estudio', url='https://recursos.univ.edu.ec/software/sqlalchemy-intro', carrera=car1)
-    rec2 = RecursoAcademico(titulo='Video: Simulación del Sistema Circulatorio', tipo='Video', url='https://recursos.univ.edu.ec/medicina/circulatorio', carrera=car2)
-    
-    # Agregar y guardar todo
-    session.add_all([fac1, fac2, prof1, prof2, rec1, rec2])
+    # Crear clínicas
+    clinica1 = Clinica(
+        nombre="Veterinaria San Francisco",
+        direccion="Av. Principal, Guayaquil",
+        responsable="Dr. Carlos Mendoza"
+    )
+
+    clinica2 = Clinica(
+        nombre="Clinica Huellitas",
+        direccion="Av. Amazonas, Quito",
+        responsable="Dra. Maria Torres"
+    )
+
+    # Crear consultorios
+    consultorio1 = Consultorio(
+        nombre="Consultorio 1",
+        especialidad="Medicina General",
+        clinica=clinica1
+    )
+
+    consultorio2 = Consultorio(
+        nombre="Consultorio 2",
+        especialidad="Cirugia",
+        clinica=clinica1
+    )
+
+    consultorio3 = Consultorio(
+        nombre="Consultorio 1",
+        especialidad="Dermatologia",
+        clinica=clinica2
+    )
+
+    # Crear veterinarios
+    veterinario1 = Veterinario(
+        nombres="Juan",
+        apellidos="Perez",
+        correo="juan@gmail.com",
+        licencia="VET001",
+        consultorio=consultorio1
+    )
+
+    veterinario2 = Veterinario(
+        nombres="Ana",
+        apellidos="Lopez",
+        correo="ana@gmail.com",
+        licencia="VET002",
+        consultorio=consultorio2
+    )
+
+    veterinario3 = Veterinario(
+        nombres="Pedro",
+        apellidos="Gomez",
+        correo="pedro@gmail.com",
+        licencia="VET003",
+        consultorio=consultorio3
+    )
+
+    # Crear historias clínicas
+    historia1 = HistoriaClinica(
+        fecha=date(2026, 11, 10),
+        diagnostico="Gastroenteritis",
+        tratamiento="Medicamentos y dieta especial",
+        mascota="Max",
+        veterinario=veterinario1
+    )
+
+    historia2 = HistoriaClinica(
+        fecha=date(2026, 11, 12),
+        diagnostico="Infeccion de piel",
+        tratamiento="Antibioticos",
+        mascota="Luna",
+        veterinario=veterinario1
+    )
+
+    historia3 = HistoriaClinica(
+        fecha=date(2026, 11, 14),
+        diagnostico="Fractura",
+        tratamiento="Inmovilizacion",
+        mascota="Rocky",
+        veterinario=veterinario2
+    )
+
+    historia4 = HistoriaClinica(
+        fecha=date(2026, 11, 15),
+        diagnostico="Dermatitis",
+        tratamiento="Tratamiento topico",
+        mascota="Milo",
+        veterinario=veterinario3
+    )
+
+    # Guardar todos los registros
+    session.add_all([
+        clinica1, clinica2,
+        consultorio1, consultorio2, consultorio3,
+        veterinario1, veterinario2, veterinario3,
+        historia1, historia2, historia3, historia4
+    ])
+
     session.commit()
-    print("Datos demográficos y académicos insertados correctamente.")
-    
-except Exception as e:
+
+    print("Datos ingresados correctamente.")
+
+except Exception as error:
     session.rollback()
-    print(f"Error al poblar la base de datos: {e}")
+    print("Error al ingresar los datos:", error)
+
 finally:
     session.close()
